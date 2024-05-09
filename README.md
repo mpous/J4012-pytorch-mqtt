@@ -115,3 +115,20 @@ MQTT image JPG created
 ...
 
 ```
+
+You can see here the images of this example.
+
+![Raw image and image with bounding boxes](https://github.com/mpous/J4012-pytorch-mqtt/assets/173156/0164ba4a-7016-40ee-8260-1e60f6e26fae)
+
+
+
+## Attribution
+
+* This is in part working thanks of the work of Kudzai Manditereza from HiveMQ, and Alan Boris and Marc Pous from balena.io.
+* This is working thanks to the amazing YoloV3 and [Dustin Franklin](https://github.com/dusty-nv) examples.
+
+
+## Disclaimer
+
+This project is for educational purposes only. Do not deploy it into production or your premises without understanding what you are doing.
+
