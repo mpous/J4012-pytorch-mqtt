@@ -60,14 +60,58 @@ Then, add the Device Variables `mqtt-broker`, `mqtt-port` and `mqtt-topic` on ba
 
 ![MQTT variables on balenaCloud](https://github.com/mpous/J4012-pytorch-mqtt/assets/173156/e9ef1fc6-5109-4d6a-9ffb-a8e07d8d6f84)
 
-Finally, run `python3 mqtt-subscriber.py` and you should see:
+Finally, run:
 
 ```
-mqtt-subscriber.py:280: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
+python3 mqtt-subscriber.py -d /inference-store
+``` 
+
+And if everything works properly you might see something similar:
+
+```
+192.168.1.156
+1883
+mqtt-subscriber.py:282: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
   client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 Connected with result code 0
-Received message from topic: balena/site/area/line/cell/camera/raw
-
+Received message from topic: balena/site/area/line/cell/camera/raw 
+MQTT image JPG created
+Reading engine from file yolov3.trt
+[05/09/2024-12:44:26] [TRT] [W] The getMaxBatchSize() function should not be used with an engine built from a network created with NetworkDefinitionCreationFlag::kEXPLICIT_BATCH flag. This function will always return 1.
+[05/09/2024-12:44:26] [TRT] [W] The getMaxBatchSize() function should not be used with an engine built from a network created with NetworkDefinitionCreationFlag::kEXPLICIT_BATCH flag. This function will always return 1.
+[05/09/2024-12:44:26] [TRT] [W] The getMaxBatchSize() function should not be used with an engine built from a network created with NetworkDefinitionCreationFlag::kEXPLICIT_BATCH flag. This function will always return 1.
+[05/09/2024-12:44:26] [TRT] [W] The getMaxBatchSize() function should not be used with an engine built from a network created with NetworkDefinitionCreationFlag::kEXPLICIT_BATCH flag. This function will always return 1.
+Running inference on image /usr/src/tensorrt/samples/python/yolov3_onnx/mqtt-image.jpg...
+[[ 19.11184406  44.34086917 468.70917977 341.92075705]
+ [ -0.64684702  49.89250563 459.59584178 431.62784936]] [0.61729218 0.99282281] [56  0]
+Saved image with bounding boxes of detected objects to mqtt_bboxes.png.
+Publishing MQTT messages after inferences...
+{
+    "detections": [
+        {
+            "class": "chair",
+            "score": 0.6172921839895628,
+            "boundingBox": {
+                "x_min": 19.111844060595615,
+                "y_min": 44.34086916586583,
+                "x_max": 468.7091797705793,
+                "y_max": 341.9207570511907
+            }
+        },
+        {
+            "class": "person",
+            "score": 0.9928228082087157,
+            "boundingBox": {
+                "x_min": -0.6468470192650599,
+                "y_min": 49.89250563283248,
+                "x_max": 459.5958417775767,
+                "y_max": 431.62784935553987
+            }
+        }
+    ]
+}
+Received message from topic: balena/site/area/line/cell/camera/raw 
+MQTT image JPG created
 ...
 
 ```
