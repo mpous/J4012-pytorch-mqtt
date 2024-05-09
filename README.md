@@ -54,11 +54,13 @@ Now you can modify `onnx_to_tensorrt.py` to run your own inferences!
 
 ## Using MQTT to get images for Object Detection With The ONNX TensorRT Backend
 
-Once you checked that your `onnx_to_tensorrt.py` is running successfully, create the file `mqtt-subscriber.py` with nano and copy the `mqtt/mqtt-subscriber.py` source code and paste it there.
+Create the file `mqtt-subscriber.py` with nano and copy the `mqtt/mqtt-subscriber.py` source code from this repository. Paste it there in the nano editor and save the code.
 
-First, add the Device Variables `mqtt-broker`, `mqtt-port` and `mqtt-topic` on balenaCloud.
+Then, add the Device Variables `mqtt-broker`, `mqtt-port` and `mqtt-topic` on balenaCloud.
 
-And run `python3 mqtt-subscriber.py` and you should see:
+![MQTT variables on balenaCloud](https://github.com/mpous/J4012-pytorch-mqtt/assets/173156/e9ef1fc6-5109-4d6a-9ffb-a8e07d8d6f84)
+
+Finally, run `python3 mqtt-subscriber.py` and you should see:
 
 ```
 mqtt-subscriber.py:280: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
