@@ -38,7 +38,9 @@ python3 yolov3_to_onnx.py -d /inference-store
 python3 onnx_to_tensorrt.py  -d /inference-store
 ```
 
-If successful, you should see:
+If there is any issue with the `yolov3.weights` file download it manually using `wget https://pjreddie.com/media/files/yolov3.weights` and move the file to the `/inference-store` folder.
+
+If successful, you should execute `python3 onnx_to_tensorrt.py  -d /inference-store` and see:
 
 ```
 Running inference on image /jetson-inference/python/training/classification/models/samples/python/yolov3_onnx/dog.jpg...
@@ -50,3 +52,20 @@ Saved image with bounding boxes of detected objects to dog_bboxes.png.
 
 Now you can modify `onnx_to_tensorrt.py` to run your own inferences!
 
+## Using MQTT to get images for Object Detection With The ONNX TensorRT Backend
+
+Once you checked that your `onnx_to_tensorrt.py` is running successfully, create the file `mqtt-subscriber.py` with nano and copy the `mqtt/mqtt-subscriber.py` source code and paste it there.
+
+First, add the Device Variables `mqtt-broker`, `mqtt-port` and `mqtt-topic` on balenaCloud.
+
+And run `python3 mqtt-subscriber.py` and you should see:
+
+```
+mqtt-subscriber.py:280: DeprecationWarning: Callback API version 1 is deprecated, update to latest version
+  client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+Connected with result code 0
+Received message from topic: balena/site/area/line/cell/camera/raw
+
+...
+
+```
