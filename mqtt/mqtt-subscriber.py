@@ -51,7 +51,9 @@ TRT_LOGGER = trt.Logger()
 
 # MQTT settings
 MQTT_BROKER = os.environ['mqtt_broker']     # 192.168.1.156
+print(MQTT_BROKER)
 MQTT_PORT = os.environ['mqtt_port']         # 1883
+print(MQTT_PORT)
 MQTT_SUB_TOPIC = os.environ['mqtt_topic']   # "balena/site/area/line/cell/camera/raw"
 MQTT_PUB_TOPIC = "balena/site/area/line/cell/camera/model_name/model_version/inference"
 MQTT_PUB_TOPIC_ML = "balena/site/area/line/cell/camera/TensorRT/v8502/inference"
@@ -72,6 +74,15 @@ def draw_bboxes(image_raw, bboxes, confidences, categories, all_categories, bbox
     the category name)
     bbox_color -- an optional string specifying the color of the bounding boxes (default: 'blue')
     """
+    
+    if image_raw is None:
+        raise ValueError("image_raw cannot be None")
+    if bboxes is None or confidences is None or all_categories is None:
+        raise ValueError("boxes, scores, and classes cannot be None")
+    if categories is None:
+        categories = {}  # Handle None categories with an empty dictionary
+    
+
     draw = ImageDraw.Draw(image_raw)
     print(bboxes, confidences, categories)
     for box, score, category in zip(bboxes, confidences, categories):
@@ -238,7 +249,11 @@ def inferenceImage():
     # Run the post-processing algorithms on the TensorRT outputs and get the bounding box details of detected objects
     boxes, classes, scores = postprocessor.process(trt_outputs, (shape_orig_WH))
     # Draw the bounding boxes onto the original input image and save it as a PNG file
-    obj_detected_img = draw_bboxes(image_raw, boxes, scores, classes, ALL_CATEGORIES)
+    try:
+        obj_detected_img = draw_bboxes(image_raw, boxes, scores, classes, ALL_CATEGORIES)
+    except ValueError as e:
+        print(e)
+        obj_detected_img = image_raw
 
     output_image_path = "mqtt_bboxes.png"
     obj_detected_img.save(output_image_path, "PNG")
@@ -277,11 +292,13 @@ def inferenceImage():
 # Create a TensorRT engine for ONNX-based YOLOv3-608 and run MQTT subcription
 # MQTT subscription
 
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
-client.connect(MQTT_BROKER, MQTT_PORT, 60)
+print("Ready to connect...")
+client.connect(MQTT_BROKER, int(MQTT_PORT), 60)
+print("Connecting...")
 
 # Blocking call that processes network traffic, dispatches callbacks, and handles reconnecting.
 client.loop_forever()
