@@ -50,9 +50,9 @@ from downloader import getFilePath
 TRT_LOGGER = trt.Logger()
 
 # MQTT settings
-MQTT_BROKER = "192.168.1.156"
-MQTT_PORT = 1883
-MQTT_SUB_TOPIC = "balena/site/area/line/cell/camera/raw"
+MQTT_BROKER = os.environ['mqtt_broker']     # 192.168.1.156
+MQTT_PORT = os.environ['mqtt_port']         # 1883
+MQTT_SUB_TOPIC = os.environ['mqtt_topic']   # "balena/site/area/line/cell/camera/raw"
 MQTT_PUB_TOPIC = "balena/site/area/line/cell/camera/model_name/model_version/inference"
 MQTT_PUB_TOPIC_ML = "balena/site/area/line/cell/camera/TensorRT/v8502/inference"
 MQTT_PUB_TOPIC_IMG = "balena/site/area/line/cell/camera/inference"
