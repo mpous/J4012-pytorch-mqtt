@@ -188,7 +188,7 @@ def on_message(client, userdata, msg):
     img = Image.open(BytesIO(img_data))
     img_jpg = img.convert('RGB')
     img_jpg.save("/usr/src/tensorrt/samples/python/yolov3_onnx/mqtt-image.jpg", "JPEG")
-
+    
     inferenceImage()
 
 
@@ -196,7 +196,6 @@ def inferenceImage():
     # Try to load a previously generated YOLOv3-608 network graph in ONNX format:
     onnx_file_path = "yolov3.onnx"
     engine_file_path = "yolov3.trt"
-
 
     # Download a dog image and save it to the following file path:
     input_image_path = getFilePath("/usr/src/tensorrt/samples/python/yolov3_onnx/mqtt-image.jpg")
@@ -215,6 +214,7 @@ def inferenceImage():
     output_shapes = [(1, 255, 19, 19), (1, 255, 38, 38), (1, 255, 76, 76)]
     # Do inference with TensorRT
     trt_outputs = []
+    
     with get_engine(onnx_file_path, engine_file_path) as engine, engine.create_execution_context() as context:
         inputs, outputs, bindings, stream = common.allocate_buffers(engine)
         # Do inference
@@ -246,47 +246,49 @@ def inferenceImage():
 
     postprocessor = PostprocessYOLO(**postprocessor_args)
 
-    # Run the post-processing algorithms on the TensorRT outputs and get the bounding box details of detected objects
-    boxes, classes, scores = postprocessor.process(trt_outputs, (shape_orig_WH))
-    # Draw the bounding boxes onto the original input image and save it as a PNG file
     try:
+        # Run the post-processing algorithms on the TensorRT outputs and get the bounding box details of detected objects
+        boxes, classes, scores = postprocessor.process(trt_outputs, (shape_orig_WH))
+        
+        # Draw the bounding boxes onto the original input image and save it as a PNG file
         obj_detected_img = draw_bboxes(image_raw, boxes, scores, classes, ALL_CATEGORIES)
+
+        # Generate detections JSON structure
+        detections = [
+                {
+                    "class": ALL_CATEGORIES[numpy_to_native(cls)],
+                    "score": numpy_to_native(score),
+                    "boundingBox": {
+                        "x_min": numpy_to_native(box[0]),
+                        "y_min": numpy_to_native(box[1]),
+                        "x_max": numpy_to_native(box[2]),
+                        "y_max": numpy_to_native(box[3]),
+                    }
+                } for cls, score, box in zip(classes, scores, boxes)
+        ]
+
+        output_image_path = "mqtt_bboxes.png"
+        obj_detected_img.save(output_image_path, "PNG")
+        print("Saved image with bounding boxes of detected objects to {}.".format(output_image_path))
+
+        # Encode the processed image back to a base64 string
+        base64_string = image_to_base64(output_image_path)
+        
+        # Serialize the Python object to a JSON formatted string
+        base64_image_message = json.dumps({"base64Image": base64_string, "detections": detections})
+        json_output = json.dumps({"detections": detections}, indent=4)
+
+        print("Publishing MQTT messages after inferences...")
+        print(json_output)
+    
+        client.publish(MQTT_PUB_TOPIC_ML, json_output)
+        client.publish(MQTT_PUB_TOPIC_IMG, base64_image_message)
+
+
     except ValueError as e:
-        print(e)
-        obj_detected_img = image_raw
-
-    output_image_path = "mqtt_bboxes.png"
-    obj_detected_img.save(output_image_path, "PNG")
-
-    print("Saved image with bounding boxes of detected objects to {}.".format(output_image_path))
-
-    # Encode the processed image back to a base64 string
-    base64_string = image_to_base64(output_image_path)
-    print("Publishing MQTT messages after inferences...")
-
-    # Generate detections JSON structure
-    detections = [
-            {
-                "class": ALL_CATEGORIES[numpy_to_native(cls)],
-                "score": numpy_to_native(score),
-                "boundingBox": {
-                    "x_min": numpy_to_native(box[0]),
-                    "y_min": numpy_to_native(box[1]),
-                    "x_max": numpy_to_native(box[2]),
-                    "y_max": numpy_to_native(box[3]),
-                }
-            } for cls, score, box in zip(classes, scores, boxes)
-    ]
-    
-    # Serialize the Python object to a JSON formatted string
-    
-    base64_image_message = json.dumps({"base64Image": base64_string, "detections": detections})
-    json_output = json.dumps({"detections": detections}, indent=4)
-
-    print(json_output)
-
-    client.publish(MQTT_PUB_TOPIC_ML, json_output)
-    client.publish(MQTT_PUB_TOPIC_IMG, base64_image_message)
+        # Log the error
+        print(f"Failed to process and draw bounding boxes due to an error: {e}")
+        # No message will be published if an error occurs
 
 
 # Create a TensorRT engine for ONNX-based YOLOv3-608 and run MQTT subcription
