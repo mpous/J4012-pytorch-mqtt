@@ -59,6 +59,7 @@ MQTT_PUB_TOPIC = "balena/site/area/line/cell/camera/model_name/model_version/inf
 MQTT_PUB_TOPIC_ML = "balena/site/area/line/cell/camera/TensorRT/v8502/inference"
 MQTT_PUB_TOPIC_IMG = "balena/site/area/line/cell/camera/inference"
 
+last_image = 0
 
 def draw_bboxes(image_raw, bboxes, confidences, categories, all_categories, bbox_color="blue"):
     """Draw the bounding boxes on the original input image and return it.
@@ -287,8 +288,16 @@ def inferenceImage():
 
     except ValueError as e:
         # Log the error
+        # No message will be published if an error occurs unless there has been a minute without image
         print(f"Failed to process and draw bounding boxes due to an error: {e}")
-        # No message will be published if an error occurs
+        print(last_image)
+        last_image+=1
+        if last_image >= 10
+            output_image_path = "mqtt_bboxes.png"
+            image_raw.save(output_image_path, "PNG")
+            base64_string = image_to_base64(output_image_path)
+            base64_image_message = json.dumps({"base64Image": base64_string, "detections": detections})
+            last_image = 0
 
 
 # Create a TensorRT engine for ONNX-based YOLOv3-608 and run MQTT subcription
