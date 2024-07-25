@@ -264,8 +264,6 @@ def inferenceImage():
     base64_string = image_to_base64(output_image_path)
     print("Publishing MQTT messages after inferences...")
 
-    base64_image_message = json.dumps({"base64Image": base64_string})
-
     # Generate detections JSON structure
     detections = [
             {
@@ -279,8 +277,10 @@ def inferenceImage():
                 }
             } for cls, score, box in zip(classes, scores, boxes)
     ]
-
+    
     # Serialize the Python object to a JSON formatted string
+    
+    base64_image_message = json.dumps({"base64Image": base64_string, "detections": detections})
     json_output = json.dumps({"detections": detections}, indent=4)
 
     print(json_output)
