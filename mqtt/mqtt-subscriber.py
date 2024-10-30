@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+x#!/usr/bin/env python3
 #
 # SPDX-FileCopyrightText: Copyright (c) 1993-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
@@ -258,19 +258,21 @@ def inferenceImage():
         obj_detected_img = draw_bboxes(image_raw, boxes, scores, classes, ALL_CATEGORIES)
 
         # Generate detections JSON structure
-        # "class": ALL_CATEGORIES[numpy_to_native(cls)],
-        detections = [
-                {
-                    "class": allowed_classes[numpy_to_native(cls)],
-                    "score": numpy_to_native(score),
+        detections = []
+
+        for cls, score, box in zip(classes, scores, boxes):
+            if cls in allowed_classes:  # Check if the class is one of the allowed types
+                detection = {
+                    "class": cls,
+                    "score": score,
                     "boundingBox": {
-                        "x_min": numpy_to_native(box[0]),
-                        "y_min": numpy_to_native(box[1]),
-                        "x_max": numpy_to_native(box[2]),
-                        "y_max": numpy_to_native(box[3]),
+                        "x_min": box[0],
+                        "y_min": box[1],
+                        "x_max": box[2],
+                        "y_max": box[3],
                     }
-                } for cls, score, box in zip(classes, scores, boxes)
-        ]
+                }
+                detections.append(detection)
 
         output_image_path = "mqtt_bboxes.png"
         obj_detected_img.save(output_image_path, "PNG")
