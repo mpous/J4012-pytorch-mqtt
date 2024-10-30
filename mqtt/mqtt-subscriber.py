@@ -296,7 +296,7 @@ def inferenceImage():
         print(f"Failed to process and draw bounding boxes due to an error: {e}")
         print(last_image)
         last_image+=1
-        if last_image >= 10
+        if last_image >= 10:
             output_image_path = "mqtt_bboxes.png"
             image_raw.save(output_image_path, "PNG")
             base64_string = image_to_base64(output_image_path)
