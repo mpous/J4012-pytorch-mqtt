@@ -248,6 +248,9 @@ def inferenceImage():
     postprocessor = PostprocessYOLO(**postprocessor_args)
 
     try:
+        # Set of allowed classes
+        allowed_classes = {'person', 'bird', 'cat', 'dog', 'bear'}  
+
         # Run the post-processing algorithms on the TensorRT outputs and get the bounding box details of detected objects
         boxes, classes, scores = postprocessor.process(trt_outputs, (shape_orig_WH))
         
@@ -255,9 +258,10 @@ def inferenceImage():
         obj_detected_img = draw_bboxes(image_raw, boxes, scores, classes, ALL_CATEGORIES)
 
         # Generate detections JSON structure
+        # "class": ALL_CATEGORIES[numpy_to_native(cls)],
         detections = [
                 {
-                    "class": ALL_CATEGORIES[numpy_to_native(cls)],
+                    "class": allowed_classes[numpy_to_native(cls)],
                     "score": numpy_to_native(score),
                     "boundingBox": {
                         "x_min": numpy_to_native(box[0]),
